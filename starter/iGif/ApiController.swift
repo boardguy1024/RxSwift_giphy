@@ -28,7 +28,7 @@ class ApiController {
   
   static let shared = ApiController()
   
-  private let apiKey = "[YOUR KEY]"
+  private let apiKey = "v90tY8Dl4tY0RI6sm9yAvr3auHotCoD8"
   
   func search(text: String) -> Observable<[JSON]> {
     let url = URL(string: "http://api.giphy.com/v1/gifs/search")!
@@ -47,3 +47,24 @@ class ApiController {
     return Observable.just([])
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
