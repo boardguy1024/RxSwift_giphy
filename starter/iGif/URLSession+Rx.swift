@@ -24,6 +24,8 @@ import Foundation
 import RxSwift
 import SwiftyJSON
 
+fileprivate var internalCache = [String: Data]()
+
 public enum RxURLSessionError: Error {
   case unknown
   case invalidResponse(response: URLResponse)
@@ -63,7 +65,13 @@ extension Reactive where Base: URLSession {
     
     
     func data(request: URLRequest) -> Observable<Data> {
-        return response(request: request).map { (response, data) -> Data in
+        
+        //cacheされたデータがあればそれを使う
+        if let url = request.url?.absoluteString, let data = internalCache[url] {
+            return Observable.just(data)
+        }
+        
+        return response(request: request).cache().map { (response, data) -> Data in
             
             if 200 ..< 300 ~= response.statusCode {
                 return data
@@ -93,6 +101,17 @@ extension Reactive where Base: URLSession {
     }
 }
 
+// observableタイプの中で、(HTTPURLResponse, Data) タイプだけをターゲットに拡張
+extension ObservableType where E == (HTTPURLResponse, Data) {
+    
+    func cache() -> Observable<E> {
+        return self.do(onNext: { (response, data) in
+            if let url = response.url?.absoluteString, 200 ..< 300 ~= response.statusCode {
+                internalCache[url] = data
+            }
+        })
+    }
+}
 
 
 
